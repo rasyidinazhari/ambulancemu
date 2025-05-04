@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() => runApp(CrowdFundingApp());
 
@@ -13,6 +14,30 @@ class CrowdFundingApp extends StatelessWidget {
   }
 }
 
+class MenuItem {
+  final IconData icon;
+  final String title;
+  MenuItem({required this.icon, required this.title});
+}
+
+class Campaign {
+  final String title;
+  final String imageUrl;
+  final String description;
+  final int targetAmount;
+  final int currentAmount;
+  final int donors;
+
+  Campaign({
+    required this.title,
+    required this.imageUrl,
+    required this.description,
+    required this.targetAmount,
+    required this.currentAmount,
+    required this.donors,
+  });
+}
+
 class DashboardPage extends StatelessWidget {
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.category, title: 'Kategori'),
@@ -23,22 +48,37 @@ class DashboardPage extends StatelessWidget {
     MenuItem(icon: Icons.share, title: 'Bagikan'),
   ];
 
-  final List<Map<String, String>> campaigns = [
-    {
-      "title": "Bantu Renovasi Sekolah",
-      "image":
+  final List<Campaign> campaigns = [
+    Campaign(
+      title: "Bantu Renovasi Sekolah",
+      imageUrl:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc8cqm1FZBs9YGD3rd9gtLpsESsboZS8gLwg&s",
-    },
-    {
-      "title": "Donasi untuk Korban Banjir",
-      "image":
+      description:
+          "Ayo bantu renovasi sekolah di daerah terpencil agar anak-anak bisa belajar dengan nyaman.",
+      targetAmount: 100000000,
+      currentAmount: 45000000,
+      donors: 120,
+    ),
+    Campaign(
+      title: "Donasi untuk Korban Banjir",
+      imageUrl:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBWCivYOWIZcdlT-YJOmywORVbg6QfZKVAyg&s",
-    },
-    {
-      "title": "Modal Usaha UMKM",
-      "image":
+      description:
+          "Banjir bandang melanda daerah selatan, ribuan keluarga butuh bantuan segera.",
+      targetAmount: 150000000,
+      currentAmount: 80000000,
+      donors: 220,
+    ),
+    Campaign(
+      title: "Modal Usaha UMKM",
+      imageUrl:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfFpa-HND6Q1p2y8Xy8qdGERcK15rk7Fjpiw&s",
-    },
+      description:
+          "Banjir bandang melanda daerah selatan, ribuan keluarga butuh bantuan segera.",
+      targetAmount: 150000000,
+      currentAmount: 80000000,
+      donors: 220,
+    ),
   ];
 
   @override
@@ -53,7 +93,6 @@ class DashboardPage extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
-          // Banner
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
@@ -63,8 +102,6 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
           SizedBox(height: 20),
-
-          // Menu Grid
           GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
@@ -95,8 +132,6 @@ class DashboardPage extends StatelessWidget {
             },
           ),
           SizedBox(height: 20),
-
-          // List Campaign Populer
           Text(
             "Campaign Populer",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -105,36 +140,46 @@ class DashboardPage extends StatelessWidget {
           Column(
             children:
                 campaigns.map((camp) {
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    margin: EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(12),
-                          ),
-                          child: Image.network(
-                            camp['image']!,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CampaignDetailPage(campaign: camp),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            camp['title']!,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                      );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
+                            child: Image.network(
+                              camp.imageUrl,
+                              height: 160,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              camp.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
@@ -154,8 +199,101 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-class MenuItem {
-  final IconData icon;
-  final String title;
-  MenuItem({required this.icon, required this.title});
+class CampaignDetailPage extends StatefulWidget {
+  final Campaign campaign;
+
+  const CampaignDetailPage({required this.campaign});
+
+  @override
+  _CampaignDetailPageState createState() => _CampaignDetailPageState();
+}
+
+class _CampaignDetailPageState extends State<CampaignDetailPage> {
+  late int currentAmount;
+  late int donors;
+  late double progress;
+
+  @override
+  void initState() {
+    super.initState();
+    currentAmount = widget.campaign.currentAmount;
+    donors = widget.campaign.donors;
+    progress = currentAmount / widget.campaign.targetAmount;
+
+    // Simulasi update real-time setiap 5 detik
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      if (mounted && currentAmount < widget.campaign.targetAmount) {
+        setState(() {
+          currentAmount += 100000; // Simulasi tambahan donasi
+          donors += 1;
+          progress = currentAmount / widget.campaign.targetAmount;
+          if (currentAmount > widget.campaign.targetAmount) {
+            currentAmount = widget.campaign.targetAmount;
+          }
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.campaign.title)),
+      body: ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              widget.campaign.imageUrl,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            widget.campaign.title,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 12),
+          Text(widget.campaign.description),
+          SizedBox(height: 20),
+          Text(
+            "Statistik Donasi (Realtime)",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.grey[300],
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+            minHeight: 10,
+          ),
+          SizedBox(height: 10),
+          Text(
+            "Terkumpul: Rp $currentAmount / Rp ${widget.campaign.targetAmount}",
+          ),
+          Text("Donatur: $donors orang"),
+          Text("Pencapaian: ${(progress * 100).toStringAsFixed(1)}%"),
+          SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Fitur donasi coming soon!')),
+              );
+            },
+            icon: Icon(Icons.volunteer_activism),
+            label: Text("Donasi Sekarang"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: EdgeInsets.symmetric(vertical: 12),
+              textStyle: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
